@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Finder</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+  <script>
+    $(document).ready(function(){
+      $("#search").submit(function(event) {
+        event.preventDefault();
+        searchByTerm();
+      });
+    });
+
+    function searchByTerm() {
+      hideResults();
+      var termValue = $("#term").val();
+      if ($.trim(termValue) === '') {
+        printStatus("Search term is empty");
+        return;
+      }
+      printStatus("Searching...");
+      $.ajax({
+        url: "/search",
+        type: "get",
+        data: {term: termValue},
+        success: showResults,
+        error: function(xhr, status, error) {
+          printStatus("Search error");
+          console.log(error);
+        }
+      });
+    }
+
+    function hideResults() {
+      $("table.results").hide();
+      $("table.results tbody tr").remove();
+    }
+
+    function showResults(response) {
+      $("table.results tbody tr").remove();
+      if ($.isEmptyObject(response)) {
+        printStatus("Nothing is found");
+        return;
+      }
+      response.forEach(function(data) {
+        var row = "<tr><td>" + data.title + "</td><td>" + data.authors
+                  + "</td><td>" + data.type + "</td></tr>";
+        $("table.results tbody").append(row);
+      });
+      printStatus("");
+      $("table.results").show();
+    }
+
+    function printStatus(status) {
+      $("div.status").text(status);
+    }
+  </script>
+</head>
+<body>
+
+<div class="container">
+  <div class="search-bar">
+    <form id="search" action="/search" method="GET">
+      <input id="term" size="30" maxlength="100" name="term" type="text" title="Search term" value="">
+      <input value="Search" type="submit">
+    </form>
+    <div class="status"></div>
+  </div>
+  <div class="search-results">
+    <table class="results" style="display: none;">
+      <thead>
+      <tr>
+        <th>Title</th>
+        <th>Authors/Artists</th>
+        <th>Type</th>
+      </tr>
+      </thead>
+
+      <tbody>
+
+      </tbody>
+    </table>
+  </div>
+</div>
+
+</body>
+</html>
