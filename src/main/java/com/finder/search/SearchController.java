@@ -11,6 +11,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 
 @Slf4j
 @RestController
@@ -21,10 +22,10 @@ public class SearchController {
     private final SearchService searchService;
 
     @GetMapping(path="/search", produces = MediaType.APPLICATION_JSON_VALUE)
-    public List<SearchResultItem> search(@RequestParam @NotBlank String term) {
+    public Flux<SearchResultItem> search(@RequestParam @NotBlank String term) {
         log.info("Start search by term: " + term);
         List<SearchResultItem> results = searchService.findByTerm(term);
         log.info("Total results count: " + results.size());
-        return results;
+        return Flux.fromIterable(results);
     }
 }
